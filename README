@@ -1,0 +1,110 @@
+Lattice QCD Code Project
+
+
+Current Members:
+--------------------------------------------------
+Charles Shugert: charles.shugert@stonybrook.edu
+Junsik Yoo:
+Moshe Kellerstein:
+
+
+Past Members:
+--------------------------------------------------
+
+
+Packages Required:
+--------------------------------------------------
+numpy, scipy,
+
+
+Packages Under Debate:
+--------------------------------------------------
+mpi4py (mpi for python)
+cython
+Boost Python
+
+*************************************************************************************************
+Log: Date - 06-23-2017
+*************************************************************************************************
+--------------------------------------------------
+Our very first meeting. We discussed possible ways how we could implement our code.
+For now what we came up with seems to make the most sense, but since we are still
+doing this early on, changes towards the code is still doable.
+
+Since defining a lattice is pretty much defining a numpy array, at the moment we
+refrain from making a lattice class. Instead we will focus on making field classes
+so that we can work with field objects.
+
+-------------------- Goal --------------------
+Define a Z2 Field. This is pretty much the Ising model for arbitrary lattice size
+and dimension. Each lattice site will be designated a number, either 0 or 1.
+In principle we should be able to generate "spin" configurations of this lattice
+for us to be able to compute observables and the error of these observables.
+
+Current Jobs:
+
+1. Define Z2 Field Class
+- should contain a method which initializes the field with a particular
+  "spin-configuration". It could be random +-1's at each lattice site like
+  hot start, or uniformly -1's like cold start. 
+
+  	Ex:
+	> z2obj = Z2class( lattice_size, init="hot start")
+	> num_of_configs = len(z2obj)
+	> print(num_of_configs)
+	1
+	> print( type( z2obj[0] )), print( z2obj[0].shape )
+	np.ndarray       lattice_size
+	> site_example = z2obj[0][(site coordinate as tuple)]
+	> print site_example
+	+1 (could be -1)
+
+- should contain method to compute Magnetization and Magnetic Susceptability
+  of any sub lattice
+  (we should be able to test this by making a bunch of random samples of +-1
+   grids if the Monte-Carlo code has not been written)
+
+   	 Ex:
+	 > z2obj = Z2class( lattice_size, init="hot start")
+	 > M, sigM = z2obj.get_M()
+	 ## THiS CODE SHOULD PROBABLY COMPUTE M FOR EACH CONFIGURATION
+	 ## COMPUTE THE M FOR A GIVEN CONFIGURATION, THEN COMPUTE THE
+	 ## AVERAGE M OVER ALL CONFIGURATIONS AND ALSO COMPUTE THE
+	 ## UNCERTIANTY (STANDARD DEVIATION) OF M OVER ALL DISTRIBUTIONS.
+	 ##
+	 ## SINCE WE HAVE NOT GENERATED ANY CONFIGURATIONS, AND BECAUSE
+	 ## OUR CURRENT "SPIN-CONFIG" MAY BE FAR FROM EQUILLIBRIUM
+	 ## SPIN-CONFIGURATION, EXPECT M TO GIVE A STUPID ANSWER WITH
+	 ## A STANDARD DEVIATION OF 0.
+	 > print M, sigM
+	 25.2     0.0
+
+- should be able to call MC methods (the ones mentioned below) to generate
+  "spin configurations" so that the above observables can me computed. 
+
+2. Make a Monte-Carlo (MC) Class
+- The way this makes most sense to me is if this is a class that contains methods
+  that act on all field objects. In this way, every field object should have access
+  to these methods. I believe this is called "inheritence" in object-oriented programming
+  lingo.
+  
+- should contain at least two different MC algorithms to choose field configurations.
+  I am thinking Metropolis Hastings and Heat Bath algorithms. Both algorithms do
+  are available in Ch4 of Gattringer and Lang. In my mind we would be able to choose
+  which algorithm we want to use via a string argument ot the method.
+
+- should be able to input Hamiltonion or Action into method.
+
+  	Ex:
+	> z2obj = Z2class( lattice_size, init="hot start")
+	> z2obj.Generate_Configurations( N = number of configs wanted, action="Ising Hamiltonion",
+				         method="Metropolis Hastings)
+	> num_of_configs = len(z2obj)
+	> print( num_of_configs)
+	N
+	> M, sigM = z2obj.get_M() # These values should be more reasonable
+
+-------------------- Hard Deadline --------------------
+Let us have some functional code that makes sense by August 5, Wednesday.
+Deadline: 08-05-2017
+DO NOT FORGET TO DOCUMENT EVERYTHING
